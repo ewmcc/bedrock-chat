@@ -8,16 +8,12 @@ based on authentication state.
 
 from dotenv import load_dotenv
 
-load_dotenv()  # Must happen before get_llm() so env vars are available.
+load_dotenv()  # Must happen before any env-var reads.
 
 from shiny import App, reactive, render, ui
 
-from llm import get_llm
 from modules.chat import chat_server, chat_ui
 from modules.login import login_server, login_ui
-
-# Initialise the LLM once at startup (cached by lru_cache in llm.py).
-llm = get_llm()
 
 
 # ── UI ────────────────────────────────────────────────────────────
@@ -32,8 +28,9 @@ app_ui = ui.page_fluid(
 
 def server(input, output, session):
     # Instantiate modules and capture their returned reactive values.
+    # The chat server creates its own LLM instance per session.
     logged_in: reactive.Value[bool] = login_server("login")
-    chat_active: reactive.Value[bool] = chat_server("chat", llm=llm)
+    chat_active: reactive.Value[bool] = chat_server("chat")
 
     # When the chat module signals logout, flip logged_in back to False.
     @reactive.effect

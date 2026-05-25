@@ -51,7 +51,7 @@ Edit `.env` and set:
 | `AWS_ACCESS_KEY_ID` | AWS access key (leave blank to use IAM role / `~/.aws/credentials`) |
 | `AWS_SECRET_ACCESS_KEY` | AWS secret key |
 | `AWS_REGION` | AWS region (default: `us-east-1`) |
-| `BEDROCK_MODEL_ID` | Bedrock model ID (default: `us.anthropic.claude-sonnet-4-20250514-v1:0`) |
+| `BEDROCK_MODEL_ID` | Bedrock model ID |
 
 > **AWS model access:** Make sure the selected Claude model is enabled in your AWS Bedrock console under **Model access** for the target region.
 

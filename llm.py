@@ -1,27 +1,38 @@
 """
 llm.py - LLM factory.
 
-Returns a configured ChatBedrockConverse singleton built from env vars.
-Import `get_llm()` wherever an LLM instance is needed.
+Returns a fresh ChatBedrockConverse instance built from env vars plus any
+caller-supplied overrides.  Call `get_llm()` once per session (or whenever
+model parameters change) rather than caching a single global instance.
 """
 
 import os
-from functools import lru_cache
 
 from langchain_aws import ChatBedrockConverse
 
 
-@lru_cache(maxsize=1)
-def get_llm() -> ChatBedrockConverse:
-    """Build and cache a ChatBedrockConverse instance from environment variables."""
+def get_llm(
+    *,
+    temperature: float = 0.7,
+    max_tokens: int = 2048,
+) -> ChatBedrockConverse:
+    """Build a ChatBedrockConverse instance from environment variables.
+
+    Parameters
+    ----------
+    temperature:
+        Sampling temperature (0 = deterministic, 1 = most creative).
+    max_tokens:
+        Maximum number of tokens in the model response.
+    """
     model_id = os.getenv("BEDROCK_MODEL_ID", "")
     region = os.getenv("AWS_REGION", "us-east-1")
 
     kwargs: dict = {
         "model_id": model_id,
         "region_name": region,
-        "temperature": 0.7,
-        "max_tokens": 2048,
+        "temperature": temperature,
+        "max_tokens": max_tokens,
     }
 
     # Only pass explicit credentials when they are set in the environment.
