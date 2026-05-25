@@ -25,7 +25,6 @@ bedrock-chat/
 git clone https://github.com/ewmcc/bedrock-chat.git
 cd bedrock-chat
 python -m venv .venv
-# Windows
 .venv\Scripts\activate
 
 ```
@@ -48,12 +47,10 @@ Edit `.env` and set:
 |---|---|
 | `APP_USERNAME` | Login username |
 | `APP_PASSWORD` | Login password |
-| `AWS_ACCESS_KEY_ID` | AWS access key (leave blank to use IAM role / `~/.aws/credentials`) |
+| `AWS_ACCESS_KEY_ID` | AWS access key |
 | `AWS_SECRET_ACCESS_KEY` | AWS secret key |
 | `AWS_REGION` | AWS region (default: `us-east-1`) |
 | `BEDROCK_MODEL_ID` | Bedrock model ID |
-
-> **AWS model access:** Make sure the selected Claude model is enabled in your AWS Bedrock console under **Model access** for the target region.
 
 ### 4. Run the app
 
@@ -63,8 +60,10 @@ shiny run app.py
 
 Then open [http://localhost:8000](http://localhost:8000) in your browser.
 
-## Notes
+## Screenshots
 
-- Conversation history is maintained per browser session and sent with every request so the model retains context.
-- The LLM client is initialised once at startup and reused across all sessions (via `lru_cache`).
-- AWS credentials fall back to the standard boto3 credential chain when `AWS_ACCESS_KEY_ID` is not set (useful for IAM roles in deployed environments).
+### Login Page
+![Login Page](images/login.png)
+
+### Example Tool Call/Response
+![Example Tool Call Response](images/app.png)

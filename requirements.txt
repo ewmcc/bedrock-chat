@@ -1,7 +1,7 @@
-shiny>=1.0.0
-langchain-aws>=0.2.0
-langchain-community>=0.2.0
-boto3>=1.34.0
-python-dotenv>=1.0.0
-ddgs>=9.0.0
-wikipedia>=1.9.1
+shiny==1.6.1
+langchain-aws==1.5.0
+langchain-core==1.4.0
+boto3==1.43.14
+python-dotenv==1.1.0
+ddgs==9.6.0
+wikipedia==1.4.0

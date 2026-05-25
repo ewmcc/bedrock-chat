@@ -21,10 +21,11 @@ chat_server(id)      → Shiny server logic; creates its own LLM per session.
 import json
 from typing import Any
 
-from langchain_community.tools import DuckDuckGoSearchRun, WikipediaQueryRun
-from langchain_community.utilities import WikipediaAPIWrapper
+from ddgs import DDGS
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
+from langchain_core.tools import tool
 from shiny import module, reactive, render, ui
+import wikipedia
 
 from llm import get_llm
 
@@ -37,12 +38,77 @@ _DEFAULT_SYSTEM_PROMPT = (
 _DEFAULT_TEMPERATURE = 0.3
 _DEFAULT_MAX_TOKENS = 1024
 
+
+# ── Tool Definitions ──────────────────────────────────────────────
+
+@tool
+def tool_search(query: str) -> str:
+    """
+    Search the web using DuckDuckGo.
+    
+    Args:
+        query: The search query string.
+        
+    Returns:
+        A string with search results.
+    """
+    try:
+        ddgs = DDGS()
+        results = ddgs.text(query, max_results=5)
+        if not results:
+            return "No search results found."
+        
+        formatted_results = []
+        for result in results:
+            formatted_results.append(
+                f"Title: {result.get('title', '')}\n"
+                f"Body: {result.get('body', '')}\n"
+                f"Link: {result.get('href', '')}"
+            )
+        return "\n\n".join(formatted_results)
+    except Exception as e:
+        return f"Search error: {str(e)}"
+
+
+@tool
+def tool_wiki(query: str) -> str:
+    """
+    Search Wikipedia for information.
+    
+    Args:
+        query: The search query string.
+        
+    Returns:
+        A string with Wikipedia summary or relevant information.
+    """
+    try:
+        results = wikipedia.search(query, results=3)
+        if not results:
+            return "No Wikipedia results found."
+        
+        formatted_results = []
+        for title in results:
+            try:
+                page = wikipedia.page(title, auto_suggest=False)
+                formatted_results.append(
+                    f"Title: {page.title}\n"
+                    f"Summary: {page.summary[:500]}...\n"
+                    f"URL: {page.url}"
+                )
+            except wikipedia.exceptions.DisambiguationError as e:
+                formatted_results.append(f"Disambiguation for '{title}': {str(e)[:200]}")
+            except wikipedia.exceptions.PageError:
+                continue
+        
+        return "\n\n".join(formatted_results) if formatted_results else "No detailed results found."
+    except Exception as e:
+        return f"Wikipedia search error: {str(e)}"
+
+
 # Pre-build tool instances (stateless, safe to share across sessions).
-_TOOL_SEARCH = DuckDuckGoSearchRun()
-_TOOL_WIKI = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper(top_k_results=3))
 _ALL_TOOLS = {
-    "tool_search": _TOOL_SEARCH,
-    "tool_wiki": _TOOL_WIKI,
+    "tool_search": tool_search,
+    "tool_wiki": tool_wiki,
 }
 
 
